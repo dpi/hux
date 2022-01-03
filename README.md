@@ -4,7 +4,10 @@ Hux
 
 There are a few projects out there that try to introduce an event subscriber
 driven way of working. Hux is an in between solution, allowing the full benefits
-of dependency injection and class driven logic.
+of dependency injection and class driven logic without going fully in with
+events. Methods can have the same signature as original hook implementations.
+Discovery is automatic, only requiring a hook class to be registered as a
+tagged Drupal service and initial cache clear.
 
 Hux is a project specifically designed for developers, allowing hook
 implementations without needing to define a .module file or any kind of proxy
