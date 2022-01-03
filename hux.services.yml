@@ -1,0 +1,10 @@
+services:
+  hux.module_handler:
+    decorates: module_handler
+    class: Drupal\hux\HuxModuleHandler
+    public: false
+    arguments:
+      - '@hux.module_handler.inner'
+    tags:
+      - { name: service_id_collector, tag: hooks }
+

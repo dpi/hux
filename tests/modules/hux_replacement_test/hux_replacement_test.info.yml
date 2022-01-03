@@ -1,0 +1,4 @@
+name: Hux Replacement Test
+type: module
+description: Tests for HUX Replacement.
+package: Testing

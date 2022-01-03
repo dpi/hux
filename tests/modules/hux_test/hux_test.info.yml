@@ -1,0 +1,4 @@
+name: Hux Test
+type: module
+description: Tests for HUX.
+package: Testing
