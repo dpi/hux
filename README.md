@@ -2,16 +2,18 @@ Hux
 
 # About
 
-There are a few projects out there that try to introduce an event subscriber
-driven way of working. Hux is an in between solution, allowing the full benefits
-of dependency injection and class driven logic without going fully in with
-events. Methods can have the same signature as original hook implementations.
-Discovery is automatic, only requiring a hook class to be registered as a
-tagged Drupal service and initial cache clear.
-
 Hux is a project specifically designed for developers, allowing hook
 implementations without needing to define a .module file or any kind of proxy
 class/service features.
+
+There are a [few][project-hook_event_dispatcher] [projects][project-hooks] 
+[out][project-entity_events] there that try to introduce an event subscriber
+driven way of working. 
+Hux is an in between solution, allowing the full benefits of dependency
+injection and class driven logic without going fully in with events. 
+Methods can have the same signature as original hook implementations.
+Discovery is automatic, only requiring a hook class to be registered as a
+tagged Drupal service and initial cache clear.
 
 You can also define multiple hook implementation per module!
 
@@ -109,3 +111,7 @@ warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Gen
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free
 Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+ [project-hook_event_dispatcher]: https://www.drupal.org/project/hook_event_dispatcher
+ [project-hooks]: https://www.drupal.org/project/hooks
+ [project-entity_events]: https://www.drupal.org/project/entity_events
