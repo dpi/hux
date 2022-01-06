@@ -2,7 +2,7 @@ services:
   hux.module_handler:
     decorates: module_handler
     class: Drupal\hux\HuxModuleHandler
-    public: false
+    public: true
     arguments:
       - '@hux.module_handler.inner'
     tags:
