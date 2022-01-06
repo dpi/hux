@@ -25,7 +25,7 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
    *
    * @var array<int,array{object, string}>
    */
-  private array $implementations;
+  private array $implementations = [];
 
   /**
    * An array of hook implementations.
