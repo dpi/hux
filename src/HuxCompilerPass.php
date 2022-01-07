@@ -6,7 +6,6 @@ namespace Drupal\hux;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Hux compiler pass.
@@ -30,7 +29,7 @@ final class HuxCompilerPass implements CompilerPassInterface {
       $moduleName = $matches[0]['moduleName'] ?? throw new \Exception(sprintf('Could not determine module name from class %s', $className));
 
       $definition->addMethodCall('addHookImplementation', [
-        new Reference($id),
+        $id,
         $moduleName,
       ]);
     }

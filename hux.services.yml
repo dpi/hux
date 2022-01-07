@@ -5,6 +5,8 @@ services:
     public: true
     arguments:
       - '@hux.module_handler.inner'
+    calls:
+      - [ setContainer, [ '@service_container' ] ]
     tags:
       - { name: service_id_collector, tag: hooks }
 

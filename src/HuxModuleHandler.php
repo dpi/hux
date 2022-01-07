@@ -8,6 +8,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\hux\Attribute\Hook;
 use Drupal\hux\Attribute\ReplaceOriginalHook;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 /**
  * Hux module handler.
@@ -17,6 +18,8 @@ use Drupal\hux\Attribute\ReplaceOriginalHook;
  * delegate invokation to an invoke method on the original class.
  */
 final class HuxModuleHandler implements ModuleHandlerInterface {
+
+  use ContainerAwareTrait;
 
   use HuxModuleHandlerProxyTrait;
 
@@ -127,13 +130,13 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
   /**
    * Adds a service defining hooks.
    *
-   * @param object $service
-   *   A service.
+   * @param string $serviceId
+   *   A service ID.
    * @param string $moduleName
    *   The defining module name.
    */
-  public function addHookImplementation(object $service, string $moduleName): void {
-    $this->implementations[] = [$service, $moduleName];
+  public function addHookImplementation(string $serviceId, string $moduleName): void {
+    $this->implementations[] = [$serviceId, $moduleName];
   }
 
   /**
@@ -166,7 +169,9 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
     }
 
     $hooks = [];
-    foreach ($this->implementations as [$service, $moduleName]) {
+    foreach ($this->implementations as [$serviceId, $moduleName]) {
+      $service = $this->container->get($serviceId);
+
       $reflectionClass = new \ReflectionClass($service);
       $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
 
@@ -214,7 +219,9 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
     }
 
     $this->hookReplacements[$hook] = [];
-    foreach ($this->implementations as [$service, $moduleName]) {
+    foreach ($this->implementations as [$serviceId, $moduleName]) {
+      $service = $this->container->get($serviceId);
+
       $reflectionClass = new \ReflectionClass($service);
       $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
 
