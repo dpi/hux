@@ -15,10 +15,12 @@ Methods can have the same signature as original hook implementations.
 Discovery is automatic, only requiring a hook class to be registered as a
 tagged Drupal service and initial cache clear.
 
-You can also define multiple hook implementation per module!
+Other features
 
-Overriding original hook implementations is also possible using the 
-`[#ReplaceOriginalHook]` annotation.
+ - Multiple hook implementations per module!
+ - Overriding original hook implementations is possible using the
+   `[#ReplaceOriginalHook]` annotation.
+ - Supports alters.
 
 # Installation
 
@@ -50,45 +52,51 @@ declare(strict_types=1);
 
 namespace Drupal\my_module;
 
+use Drupal\hux\Attribute\Alter;
 use Drupal\hux\Attribute\Hook;
 use Drupal\hux\Attribute\ReplaceOriginalHook;
 
 /**
- * Examples of 'entity_access' hooks.
+ * Examples of 'entity_access' hooks and 'user_format_name' alter.
  */
 final class MyModuleHooks {
 
   #[Hook('entity_access')]
-  public function myEntityAccess($entity, $operation, $account): AccessResult {
+  public function myEntityAccess(EntityInterface $entity, string $operation, AccountInterface $account): AccessResult {
     // A barebones implementation.
     return AccessResult::neutral();
   }
 
   #[Hook('entity_access', priority: 100)]
-  public function myEntityAccess2($entity, $operation, $account): AccessResult {
+  public function myEntityAccess2(EntityInterface $entity, string $operation, AccountInterface $account): AccessResult {
     // You can set priority if you have multiple of the same hook!
     return AccessResult::neutral();
   }
 
   #[Hook('entity_access', moduleName: 'a_different_module', priority: 200)]
-  public function myEntityAccess3($entity, $operation, $account): AccessResult {
+  public function myEntityAccess3(EntityInterface $entity, string $operation, AccountInterface $account): AccessResult {
     // You can masquerade as a different module!
     return AccessResult::neutral();
   }
 
   #[ReplaceOriginalHook(hook: 'entity_access', moduleName: 'media')]
-  public function myEntityAccess4(EntityInterface $entity, $operation, AccountInterface $account): AccessResult {
+  public function myEntityAccess4(EntityInterface $entity, string $operation, AccountInterface $account): AccessResult {
     // You can override hooks for other modules! E.g \media_entity_access()
     return AccessResult::neutral();
   }
 
   #[ReplaceOriginalHook(hook: 'entity_access', moduleName: 'media', originalInvoker: TRUE)]
-  public function myEntityAccess5(callable $originalInvoker, EntityInterface $entity, $operation, AccountInterface $account): AccessResult {
+  public function myEntityAccess5(callable $originalInvoker, EntityInterface $entity, string $operation, AccountInterface $account): AccessResult {
     // If you override a hook for another module, you can have the original
     // implementation passed to you as a callable!
     $originalResult = $originalInvoker($entity, $operation, $account);
     // Do something...
     return AccessResult::neutral();
+  }
+
+  #[Alter('user_format_name')]
+  public function myEntityAccess3(string &$name, AccountInterface $account): AccessResult {
+    $name .= ' altered!'; 
   }
 
 }

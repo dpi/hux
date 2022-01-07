@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Drupal\Tests\hux\Kernel;
+
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ModuleInstallerInterface;
 use Drupal\hux_test\HuxTestCallTracker;

@@ -6,6 +6,7 @@ namespace Drupal\hux;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\hux\Attribute\Alter;
 use Drupal\hux\Attribute\Hook;
 use Drupal\hux\Attribute\ReplaceOriginalHook;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
@@ -43,6 +44,13 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
    * @var array<string, array<string, \Drupal\hux\HuxReplacementHook>>
    */
   private array $hookReplacements;
+
+  /**
+   * Alter callables keyed by alter.
+   *
+   * @var array<string, callable[]>
+   */
+  private array $alters;
 
   /**
    * Constructs a new HuxModuleHandler.
@@ -154,6 +162,34 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function alter($type, &$data, &$context1 = NULL, &$context2 = NULL): void {
+    $this->inner->alter($type, $data, $context1, $context2);
+
+    $types = is_array($type) ? $type : [$type];
+    foreach ($types as $alter) {
+      foreach ($this->generateAlterInvokers($alter) as $alterInvoker) {
+        $alterInvoker($data, $context1, $context2);
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function alterDeprecated($description, $type, &$data, &$context1 = NULL, &$context2 = NULL): void {
+    $this->inner->alterDeprecated($description, $type, $data, $context1, $context2);
+
+    $types = is_array($type) ? $type : [$type];
+    foreach ($types as $alter) {
+      foreach ($this->generateAlterInvokers($alter) as $alterInvoker) {
+        $alterInvoker($data, $context1, $context2);
+      }
+    }
+  }
+
+  /**
    * Generates invokers for a hook.
    *
    * @param string $hook
@@ -247,6 +283,50 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
     }
 
     return $this->hookReplacements[$hook];
+  }
+
+  /**
+   * Generates invokers for an alter.
+   *
+   * @param string $alter
+   *   An alter.
+   *
+   * @return \Generator<array{callable, string}>
+   *   A generator with hook callbacks and other metadata.
+   */
+  private function generateAlterInvokers(string $alter) {
+    if (isset($this->alters[$alter])) {
+      yield from $this->alters[$alter];
+      return;
+    }
+
+    $alters = [];
+    foreach ($this->implementations as [$serviceId, $moduleName]) {
+      $service = $this->container->get($serviceId);
+
+      $reflectionClass = new \ReflectionClass($service);
+      $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+      foreach ($methods as $reflectionMethod) {
+        $attributes = $reflectionMethod->getAttributes(Alter::class);
+        $attribute = $attributes[0] ?? NULL;
+        if ($attribute) {
+          $instance = $attribute->newInstance();
+          assert($instance instanceof Alter);
+          if ($alter === $instance->alter) {
+            $alters[] = \Closure::fromCallable([
+              $service,
+              $reflectionMethod->getName(),
+            ]);
+          }
+        }
+      }
+    }
+
+    // Wait for all the [sorted] callables before caching.
+    $this->alters[$alter] = $alters;
+
+    yield from $this->alters[$alter];
   }
 
 }
