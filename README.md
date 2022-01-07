@@ -95,7 +95,7 @@ final class MyModuleHooks {
   }
 
   #[Alter('user_format_name')]
-  public function myEntityAccess3(string &$name, AccountInterface $account): AccessResult {
+  public function myCustomAlter(string &$name, AccountInterface $account): void {
     $name .= ' altered!'; 
   }
 
