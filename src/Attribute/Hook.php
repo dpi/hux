@@ -31,6 +31,18 @@ class Hook {
   ) {
     // Specifically look for 'hook_' at position zero.
     assert(strpos($hook, 'hook_') !== 0);
+    if (in_array($hook, [
+      // This hook is invoked by \Drupal\Core\Theme\Registry::processExtension.
+      // It is not converted to a moduleHandler->invoke* by the core patch since
+      // it needs to be able to invoke to module, theme engine, base theme
+      // engine, themes, etc.
+      'theme',
+    ], TRUE)) {
+      // If this hook becomes supported, and Hux is still throwing this
+      // exception, then you can temporarily extend this class and constructor
+      // to workaround this check.
+      throw new \Exception($hook . ' is an unsupported hook implementation.');
+    }
   }
 
 }
