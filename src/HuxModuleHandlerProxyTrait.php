@@ -135,8 +135,8 @@ trait HuxModuleHandlerProxyTrait {
   /**
    * {@inheritdoc}
    */
-  public function hasImplementations(string $hook): bool {
-    return $this->inner->hasImplementations($hook);
+  public function hasImplementations(string $hook, $modules = NULL): bool {
+    return $this->inner->hasImplementations($hook, $modules);
   }
 
   /**
