@@ -1,0 +1,10 @@
+{
+  "name": "drupal/hux",
+  "description": "New hooks",
+  "type": "drupal-module",
+  "require": {
+    "php": ">=8.0",
+    "drupal/core": "^9 || ^10",
+    "drupal/symfony": ">=6"
+  }
+}
