@@ -7,7 +7,7 @@ namespace Drupal\hux\Attribute;
 /**
  * A hook.
  */
-#[\Attribute]
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class Hook {
 
   /**

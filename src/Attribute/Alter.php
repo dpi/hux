@@ -7,7 +7,7 @@ namespace Drupal\hux\Attribute;
 /**
  * An alter.
  */
-#[\Attribute]
+#[\Attribute(\Attribute::TARGET_METHOD)]
 class Alter {
 
   /**
