@@ -38,36 +38,20 @@ final class HuxCompilerPassUnitTest extends UnitTestCase {
       ->willReturn(TRUE);
     $containerBuilder->setDefinition('hux.module_handler', $huxModuleHandlerDefinition);
 
-    $huxModuleHandlerDefinition->expects($this->exactly(4))
+    $huxModuleHandlerDefinition->expects($this->exactly(1))
       ->method('addMethodCall')
       ->withConsecutive(
         [
-          'addHookImplementation',
-          [
-            'hux.auto.drupal_hux_auto_test__hooks__sub__hux_auto_sub_hooks',
-            'hux_auto_test',
-          ],
-        ],
-        [
-          'addHookImplementation',
-          [
-            'hux.auto.drupal_hux_auto_test__hooks__hux_auto_single',
-            'hux_auto_test',
-          ],
-        ],
-        [
-          'addHookImplementation',
-          [
-            'hux.auto.drupal_hux_auto_test__hooks__hux_auto_multiple',
-            'hux_auto_test',
-          ],
-        ],
-        [
-          'addHookImplementation',
-          [
-            'hux.auto.drupal_hux_auto_test__hooks__hux_auto_container_injection',
-            'hux_auto_test',
-          ],
+          'discovery',
+          $this->callback(function ($args) {
+            return (
+              $args[0] instanceof Reference &&
+              (string) $args[0] === 'service_container'
+              // Order of values in $args[1] seems to vary by testing
+              // environment so simply assert quantity.
+              && count($args[1]) === 4
+            );
+          }),
         ],
       );
 

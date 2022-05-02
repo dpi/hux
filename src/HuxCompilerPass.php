@@ -10,6 +10,7 @@ use Drupal\hux\Attribute\Hook;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 
@@ -47,7 +48,7 @@ final class HuxCompilerPass implements CompilerPassInterface {
       $definition = new Definition($className);
       $definition
         ->addTag('hooks')
-        ->setPrivate(TRUE);
+        ->setPublic(TRUE);
 
       if ((new \ReflectionClass($className))->isSubclassOf(ContainerInjectionInterface::class)) {
         $definition
@@ -60,18 +61,23 @@ final class HuxCompilerPass implements CompilerPassInterface {
 
     $huxModuleHandler = $container->findDefinition('hux.module_handler');
 
-    foreach ($container->findTaggedServiceIds('hooks') as $id => $tags) {
-      $serviceDefinition = $container->getDefinition($id);
-      /** @var class-string|null $className */
-      $className = $serviceDefinition->getClass();
-      preg_match_all('/^Drupal\\\\(?<moduleName>[a-z_0-9]{1,32})\\\\.*$/m', $className, $matches, PREG_SET_ORDER);
-      $moduleName = $matches[0]['moduleName'] ?? throw new \Exception(sprintf('Could not determine module name from class %s', $className));
-
-      $huxModuleHandler->addMethodCall('addHookImplementation', [
-        $id,
-        $moduleName,
-      ]);
-    }
+    $serviceIds = array_keys($container->findTaggedServiceIds('hooks'));
+    $implementations = array_combine(
+      $serviceIds,
+      array_map(function (string $serviceId) use ($container): array {
+        $serviceDefinition = $container->getDefinition($serviceId);
+        /** @var class-string|null $className */
+        $className = $serviceDefinition->getClass();
+        preg_match_all('/^Drupal\\\\(?<moduleName>[a-z_0-9]{1,32})\\\\.*$/m', $className, $matches, PREG_SET_ORDER);
+        $moduleName = $matches[0]['moduleName'] ?? throw new \Exception(sprintf('Could not determine module name from class %s', $className));
+        return [$moduleName, $className];
+      }, $serviceIds),
+    );
+    $huxModuleHandler->addMethodCall('discovery', [
+      new Reference('service_container'),
+      $implementations,
+      new Parameter('hux'),
+    ]);
   }
 
   /**

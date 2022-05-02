@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace Drupal\hux;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\hux\Attribute\Alter;
-use Drupal\hux\Attribute\Hook;
-use Drupal\hux\Attribute\ReplaceOriginalHook;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Hux module handler.
@@ -24,19 +23,14 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
 
   use HuxModuleHandlerProxyTrait;
 
-  /**
-   * An array of services objects and module name.
-   *
-   * @var array<int,array{object, string}>
-   */
-  private array $implementations = [];
+  private HuxDiscovery $discovery;
 
   /**
    * An array of hook implementations.
    *
-   * @var array<string, callable[]>
+   * @var array<string, array{callable, string, int}>
    */
-  private array $hooks;
+  private array $hooks = [];
 
   /**
    * Hook replacement callables keyed by hook, then module name.
@@ -57,9 +51,12 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
    *
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $inner
    *   The inner module handler.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cacheBackend
+   *   A fast cache backend.
    */
   public function __construct(
-    protected ModuleHandlerInterface $inner
+    protected ModuleHandlerInterface $inner,
+    protected CacheBackendInterface $cacheBackend,
   ) {
   }
 
@@ -136,18 +133,6 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
   }
 
   /**
-   * Adds a service defining hooks.
-   *
-   * @param string $serviceId
-   *   A service ID.
-   * @param string $moduleName
-   *   The defining module name.
-   */
-  public function addHookImplementation(string $serviceId, string $moduleName): void {
-    $this->implementations[] = [$serviceId, $moduleName];
-  }
-
-  /**
    * Invokes hooks with a callable.
    *
    * @param string $hook
@@ -205,27 +190,18 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
     }
 
     $hooks = [];
-    foreach ($this->implementations as [$serviceId, $moduleName]) {
+    foreach ($this->discovery->getHooks($hook) as [
+      $serviceId,
+      $moduleName,
+      $methodName,
+      $priority,
+    ]) {
       $service = $this->container->get($serviceId);
-
-      $reflectionClass = new \ReflectionClass($service);
-      $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
-
-      foreach ($methods as $reflectionMethod) {
-        $attributes = $reflectionMethod->getAttributes(Hook::class);
-        $attribute = $attributes[0] ?? NULL;
-        if ($attribute) {
-          $instance = $attribute->newInstance();
-          assert($instance instanceof Hook);
-          if ($hook === $instance->hook) {
-            $hooks[] = [
-              \Closure::fromCallable([$service, $reflectionMethod->getName()]),
-              $instance->moduleName ?? $moduleName,
-              $instance->priority,
-            ];
-          }
-        }
-      }
+      $hooks[] = [
+        \Closure::fromCallable([$service, $methodName]),
+        $moduleName,
+        $priority,
+      ];
     }
 
     usort($hooks, function (array $a, array $b) {
@@ -255,31 +231,18 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
     }
 
     $this->hookReplacements[$hook] = [];
-    foreach ($this->implementations as [$serviceId, $moduleName]) {
+    foreach ($this->discovery->getHookReplacements($hook) as [
+      $serviceId,
+      $moduleName,
+      $methodName,
+      $originalInvoker,
+    ]) {
       $service = $this->container->get($serviceId);
-
-      $reflectionClass = new \ReflectionClass($service);
-      $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
-
-      foreach ($methods as $reflectionMethod) {
-        $attributes = $reflectionMethod->getAttributes(ReplaceOriginalHook::class);
-        $attribute = $attributes[0] ?? NULL;
-        if ($attribute) {
-          $instance = $attribute->newInstance();
-          assert($instance instanceof ReplaceOriginalHook);
-          if ($hook === $instance->hook) {
-            $hookInvoker = \Closure::fromCallable([
-              $service,
-              $reflectionMethod->getName(),
-            ]);
-
-            $this->hookReplacements[$hook][$instance->moduleName] = new HuxReplacementHook(
-              $hookInvoker,
-              $instance->originalInvoker,
-            );
-          }
-        }
-      }
+      $hookInvoker = \Closure::fromCallable([$service, $methodName]);
+      $this->hookReplacements[$hook][$moduleName] = new HuxReplacementHook(
+        $hookInvoker,
+        $originalInvoker,
+      );
     }
 
     return $this->hookReplacements[$hook];
@@ -300,33 +263,39 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
       return;
     }
 
-    $alters = [];
-    foreach ($this->implementations as [$serviceId, $moduleName]) {
+    $this->alters[$alter] = [];
+    foreach ($this->discovery->getAlters($alter) as [$serviceId, $methodName]) {
       $service = $this->container->get($serviceId);
-
-      $reflectionClass = new \ReflectionClass($service);
-      $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
-
-      foreach ($methods as $reflectionMethod) {
-        $attributes = $reflectionMethod->getAttributes(Alter::class);
-        $attribute = $attributes[0] ?? NULL;
-        if ($attribute) {
-          $instance = $attribute->newInstance();
-          assert($instance instanceof Alter);
-          if ($alter === $instance->alter) {
-            $alters[] = \Closure::fromCallable([
-              $service,
-              $reflectionMethod->getName(),
-            ]);
-          }
-        }
-      }
+      $this->alters[$alter][] = \Closure::fromCallable([$service, $methodName]);
     }
 
-    // Wait for all the [sorted] callables before caching.
-    $this->alters[$alter] = $alters;
-
     yield from $this->alters[$alter];
+  }
+
+  /**
+   * Initialises and caches, or unserializes discovery.
+   *
+   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+   *   The service container.
+   * @param array<string, array{string}> $implementations
+   *   An array of module names keyed by service ID.
+   * @param array{optimize: bool} $huxParameters
+   *   Parameters from the container. Defaults are provided in hux.services.yml
+   *   Sites can override the default value in their own services.yml files.
+   */
+  public function discovery(ContainerInterface $container, array $implementations, array $huxParameters): void {
+    ['optimize' => $optimize] = $huxParameters;
+    $optimize ?? throw new \Exception('Missing Hux parameters. App is misconfigured.');
+    if ($optimize && ($cache = $this->cacheBackend->get('hux.discovery'))) {
+      $this->discovery = $cache->data;
+    }
+    else {
+      $this->discovery = new HuxDiscovery($implementations);
+      $this->discovery->discovery($container);
+      if ($optimize) {
+        $this->cacheBackend->set('hux.discovery', $this->discovery);
+      }
+    }
   }
 
 }

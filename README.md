@@ -25,8 +25,8 @@ Other features
 # Installation
 
  1. Install as normally.
- 2. Patch core with in progress patch from
-    https://www.drupal.org/project/drupal/issues/2616814
+ 2. No additional steps if running Drupal 9.4 or later. If using Drupal 9.3, use
+    a patch core from https://www.drupal.org/project/drupal/issues/2616814
 
 # Usage
 
@@ -108,6 +108,22 @@ at https://www.drupal.org/project/coder/issues/3250346 to appease code sniffer.
 
 Working examples of all Hux features can be found in included tests.
 
+# Optional configuration
+
+## Optimised mode
+
+Hux' [optimized mode][optimized-mode] provides an option geared towards being 
+developer friendly or optimized for production use. By default this mode is off,
+but it should be turned on in production for small gains in performance.
+
+To control whether Hux optimized mode is on or off, add to your `services.yml`:
+
+```yaml
+parameters:
+  hux:
+    optimize: true
+```
+
 # License
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -123,3 +139,4 @@ Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-130
  [project-hook_event_dispatcher]: https://www.drupal.org/project/hook_event_dispatcher
  [project-hooks]: https://www.drupal.org/project/hooks
  [project-entity_events]: https://www.drupal.org/project/entity_events
+ [optimized-mode]: https://www.drupal.org/docs/contributed-modules/hux/hux-optimized-mode
