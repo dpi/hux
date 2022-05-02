@@ -1,0 +1,7 @@
+{
+  "patches": {
+    "drupal/coder": {
+      "advanced data types": "https://github.com/pfrenssen/coder/pull/158.patch"
+    }
+  }
+}

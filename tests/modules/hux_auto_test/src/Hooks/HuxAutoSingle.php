@@ -12,6 +12,9 @@ use Drupal\hux_test\HuxTestCallTracker;
  */
 final class HuxAutoSingle {
 
+  /**
+   * Implements hook_test_hook().
+   */
   #[Hook('test_hook')]
   public function testHook(string $something): void {
     HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $something]);

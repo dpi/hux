@@ -223,7 +223,7 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
    *   A hook.
    *
    * @return array<string, \Drupal\hux\HuxReplacementHook>
-   *   Hook replacement callables keyed module name .
+   *   Hook replacement callables keyed by module name.
    */
   private function getOriginalHookReplacementInvokers(string $hook): array {
     if (isset($this->hookReplacements[$hook])) {
@@ -279,7 +279,7 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
    *   The service container.
    * @param array<string, array{string}> $implementations
    *   An array of module names keyed by service ID.
-   * @param array{optimize: bool} $huxParameters
+   * @param array{optimize: bool|null} $huxParameters
    *   Parameters from the container. Defaults are provided in hux.services.yml
    *   Sites can override the default value in their own services.yml files.
    */

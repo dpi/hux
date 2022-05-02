@@ -22,7 +22,7 @@ final class HuxHooks implements ContainerInjectionInterface {
   /**
    * Constructs Hooks for Hux.
    *
-   * @param TranslationInterface $stringTranslation
+   * @param \Drupal\Core\StringTranslation\TranslationInterface $stringTranslation
    *   The string translation service.
    * @param string $environment
    *   The app environment.

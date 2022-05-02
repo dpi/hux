@@ -15,6 +15,7 @@ namespace Drupal\hux\Attribute;
  * This does not extend the Hook attribute to simplify things.
  */
 #[\Attribute(\Attribute::TARGET_METHOD)]
+// @codingStandardsIgnoreLine
 final class ReplaceOriginalHook {
 
   /**

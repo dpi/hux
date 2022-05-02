@@ -7,6 +7,9 @@ namespace Drupal\hux_replacement_test;
 use Drupal\hux\Attribute\ReplaceOriginalHook;
 use Drupal\hux_test\HuxTestCallTracker;
 
+/**
+ * Replacement test hooks.
+ */
 final class HuxReplacementTestHooks {
 
   /**
@@ -25,7 +28,7 @@ final class HuxReplacementTestHooks {
    *
    * @see hux_test_foo2()
    */
-  #[ReplaceOriginalHook('foo2', moduleName: 'hux_test', originalInvoker: true)]
+  #[ReplaceOriginalHook('foo2', moduleName: 'hux_test', originalInvoker: TRUE)]
   public function myReplacementWithOriginal(callable $originalInvoker, string $something): mixed {
     HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $something]);
     $originalInvoker($something);

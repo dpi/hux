@@ -12,11 +12,17 @@ use Drupal\hux_test\HuxTestCallTracker;
  */
 final class HuxAutoMultiple {
 
+  /**
+   * Implements hook_test_hook().
+   */
   #[Hook('test_hook')]
   public function testHook1(string $something): void {
     HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $something]);
   }
 
+  /**
+   * Implements hook_test_hook().
+   */
   #[Hook('test_hook')]
   public function testHook2(string $something): void {
     HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $something]);

@@ -8,6 +8,7 @@ namespace Drupal\hux\Attribute;
  * An alter.
  */
 #[\Attribute(\Attribute::TARGET_METHOD)]
+// @codingStandardsIgnoreLine
 class Alter {
 
   /**

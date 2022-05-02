@@ -8,6 +8,7 @@ namespace Drupal\hux\Attribute;
  * A hook.
  */
 #[\Attribute(\Attribute::TARGET_METHOD)]
+// @codingStandardsIgnoreLine
 class Hook {
 
   /**

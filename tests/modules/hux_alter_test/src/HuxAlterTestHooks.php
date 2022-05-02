@@ -7,6 +7,9 @@ namespace Drupal\hux_alter_test;
 use Drupal\hux\Attribute\Alter;
 use Drupal\hux_test\HuxTestCallTracker;
 
+/**
+ * Test hooks.
+ */
 final class HuxAlterTestHooks {
 
   /**

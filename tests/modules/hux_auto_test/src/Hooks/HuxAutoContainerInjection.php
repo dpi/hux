@@ -32,6 +32,9 @@ final class HuxAutoContainerInjection implements ContainerInjectionInterface {
     );
   }
 
+  /**
+   * Implements hook_test_hook().
+   */
   #[Hook('test_hook')]
   public function testHook(string $something): void {
     HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $something, $this->time->getRequestTime()]);

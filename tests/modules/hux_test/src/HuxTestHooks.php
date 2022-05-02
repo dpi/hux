@@ -6,6 +6,9 @@ namespace Drupal\hux_test;
 
 use Drupal\hux\Attribute\Hook;
 
+/**
+ * Test hooks.
+ */
 final class HuxTestHooks {
 
   /**
