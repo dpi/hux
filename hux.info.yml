@@ -1,6 +1,6 @@
 name: Hux
 type: module
 description: New hooks
-core_version_requirement: ^9
+core_version_requirement: '>=9'
 php: 8.0
 package: System
