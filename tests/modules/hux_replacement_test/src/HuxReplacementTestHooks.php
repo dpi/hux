@@ -35,4 +35,18 @@ final class HuxReplacementTestHooks {
     return __FUNCTION__ . ' return';
   }
 
+  /**
+   * Replaces hux_test_foo3().
+   * Replaces hux_test_foo4().
+   *
+   * Tests a hook replacement listening for multiple hooks.
+   */
+  #[
+    ReplaceOriginalHook('foo3', moduleName: 'hux_test'),
+    ReplaceOriginalHook('foo4', moduleName: 'hux_test'),
+  ]
+  public function testHookMultiListener(string $something): void {
+    HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $something]);
+  }
+
 }

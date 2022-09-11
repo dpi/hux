@@ -65,7 +65,7 @@ final class HuxDiscovery {
         $methodName = $reflectionMethod->getName();
 
         $attributesHooks = $reflectionMethod->getAttributes(Hook::class);
-        if ($attribute = $attributesHooks[0] ?? NULL) {
+        foreach ($attributesHooks as $attribute) {
           $instance = $attribute->newInstance();
           assert($instance instanceof Hook);
           $this->discovery[Hook::class][$instance->hook][] = [
@@ -77,7 +77,7 @@ final class HuxDiscovery {
         }
 
         $attributesHookReplacements = $reflectionMethod->getAttributes(ReplaceOriginalHook::class);
-        if ($attribute = $attributesHookReplacements[0] ?? NULL) {
+        foreach ($attributesHookReplacements as $attribute) {
           $instance = $attribute->newInstance();
           assert($instance instanceof ReplaceOriginalHook);
           $this->discovery[ReplaceOriginalHook::class][$instance->hook][] = [
@@ -89,7 +89,7 @@ final class HuxDiscovery {
         }
 
         $attributesAlters = $reflectionMethod->getAttributes(Alter::class);
-        if ($attribute = $attributesAlters[0] ?? NULL) {
+        foreach ($attributesAlters as $attribute) {
           $instance = $attribute->newInstance();
           assert($instance instanceof Alter);
           $this->discovery[Alter::class][$instance->alter][] = [
