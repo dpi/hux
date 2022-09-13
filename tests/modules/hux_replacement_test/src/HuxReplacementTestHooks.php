@@ -37,6 +37,19 @@ final class HuxReplacementTestHooks {
   }
 
   /**
+   * Replaces one function and two Hux hooks.
+   *
+   * @see \hux_test_test_hook_single_invoke_return()
+   * @see \Drupal\hux_test\HuxTestHooks::testHookSingleReturn1
+   * @see \Drupal\hux_test\HuxTestHooks::testHookSingleReturn2
+   */
+  #[ReplaceOriginalHook('test_hook_single_invoke_return', moduleName: 'hux_test', originalInvoker: TRUE)]
+  public function myReplacementWithOriginalMultipleImplementations(callable $originalInvoker, string $something): mixed {
+    HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $something]);
+    return __FUNCTION__ . ' passed down ' . $originalInvoker($something);
+  }
+
+  /**
    * Replaces multiple hooks.
    *
    * Replaces hook_original_invoker_attribute().

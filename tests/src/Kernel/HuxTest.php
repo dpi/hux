@@ -62,6 +62,71 @@ final class HuxTest extends KernelTestBase {
   }
 
   /**
+   * Tests single invoke defers to default implementation when no Hux hooks.
+   *
+   * @covers ::invoke
+   * @see \hux_test_single_invoke()
+   */
+  public function testInvokeNoHux(): void {
+    $result = $this->moduleHandler()->invoke('hux_test', 'single_invoke');
+    $this->assertEquals([
+      'hux_test_single_invoke',
+    ], HuxTestCallTracker::$calls);
+    $this->assertEquals('hux_test_single_invoke return', $result);
+  }
+
+  /**
+   * Tests single invoke defers to default implementation with Hux hooks.
+   *
+   * @covers ::invoke
+   * @see \hux_test_test_hook_single_invoke_return()
+   * @see \Drupal\hux_test\HuxTestHooks::testHookSingleReturn1
+   * @see \Drupal\hux_test\HuxTestHooks::testHookSingleReturn2
+   */
+  public function testInvokeWithHux(): void {
+    $result = $this->moduleHandler()->invoke('hux_test', 'test_hook_single_invoke_return');
+    $this->assertEquals([
+      'hux_test_test_hook_single_invoke_return',
+      [
+        'Drupal\hux_test\HuxTestHooks',
+        'testHookSingleReturn1',
+      ],
+      [
+        'Drupal\hux_test\HuxTestHooks',
+        'testHookSingleReturn2',
+      ],
+    ], HuxTestCallTracker::$calls);
+    // Only the last invocation return value is returned.
+    $this->assertEquals('testHookSingleReturn2 return', $result);
+  }
+
+  /**
+   * Tests single invoke context is mutated and passed by reference.
+   *
+   * @covers ::invoke
+   * @see \hux_test_test_hook_single_invoke_return()
+   * @see \Drupal\hux_test\HuxTestHooks::testHookSingleReturn1
+   * @see \Drupal\hux_test\HuxTestHooks::testHookSingleReturn2
+   */
+  public function testInvokeWithHuxMutatesByReference(): void {
+    $something = 0;
+    $this->moduleHandler()->invoke('hux_test', 'single_invoke_argument_reference', [&$something]);
+    $this->assertEquals([
+      [
+        'hux_test_single_invoke_argument_reference',
+        1,
+      ],
+      [
+        'Drupal\hux_test\HuxTestHooks',
+        'testInvokeWithHuxMutatesByReference',
+        2,
+      ],
+    ], HuxTestCallTracker::$calls);
+    // Only the last invocation return value is returned.
+    $this->assertEquals(2, $something);
+  }
+
+  /**
    * @covers \Drupal\hux\HuxDiscovery::discovery
    * @see \Drupal\hux_test\HuxTestHooks::testHookMultiListener
    */

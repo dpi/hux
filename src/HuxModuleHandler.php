@@ -64,13 +64,26 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
    * {@inheritdoc}
    */
   public function invoke($module, $hook, array $args = []) {
+    $original = function (&...$args) use ($module, $hook): mixed {
+      // If there are Hux implementations, only the last return value
+      // will be returned.
+      $return = $this->inner->invoke($module, $hook, $args);
+
+      $callback = static function (callable $hookInvoker, string $calledModule) use ($module, $args, &$return): void {
+        if ($module === $calledModule) {
+          $return = $hookInvoker(...$args);
+        }
+      };
+      $this->invokeHux($hook, $callback);
+      return $return;
+    };
+
     $replacements = $this->getOriginalHookReplacementInvokers($hook);
-    $replacement = ($replacements[$module] ?? NULL)?->getCallable(
-      fn (...$args) => $this->inner->invoke($module, $hook, [...$args])
-    );
+    $replacement = ($replacements[$module] ?? NULL)?->getCallable($original);
+
     return $replacement
       ? $replacement(...$args)
-      : $this->inner->invoke($module, $hook, $args);
+      : $original(...$args);
   }
 
   /**

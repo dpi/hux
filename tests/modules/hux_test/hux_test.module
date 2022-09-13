@@ -62,3 +62,27 @@ function hux_test_original_invoker_attribute_last(): string {
   HuxTestCallTracker::record(__FUNCTION__);
   return __FUNCTION__ . ' return';
 }
+
+/**
+ * Implements hook_single_invoke().
+ */
+function hux_test_single_invoke(): string {
+  HuxTestCallTracker::record(__FUNCTION__);
+  return __FUNCTION__ . ' return';
+}
+
+/**
+ * Implements hook_test_hook_single_invoke_return().
+ */
+function hux_test_test_hook_single_invoke_return(): string {
+  HuxTestCallTracker::record(__FUNCTION__);
+  return __FUNCTION__ . ' return';
+}
+
+/**
+ * Implements hook_single_invoke_argument_reference().
+ */
+function hux_test_single_invoke_argument_reference(int &$something): void {
+  $something++;
+  HuxTestCallTracker::record([__FUNCTION__, $something]);
+}

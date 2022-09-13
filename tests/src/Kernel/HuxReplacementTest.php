@@ -75,6 +75,38 @@ final class HuxReplacementTest extends KernelTestBase {
   }
 
   /**
+   * Tests with the replacement and original invoker.
+   *
+   * Tests specifically with ::invoke, with multiple implementations.
+   *
+   * @covers ::invoke
+   * @see \hux_test_test_hook_single_invoke_return()
+   * @see \Drupal\hux_test\HuxTestHooks::testHookSingleReturn1
+   * @see \Drupal\hux_test\HuxTestHooks::testHookSingleReturn2
+   */
+  public function testInvokeReplacementWithOriginalInvokerSingleInvokeMultiple(): void {
+    $this->moduleInstaller()->install(['hux_replacement_test'], TRUE);
+    $result = $this->moduleHandler()->invoke('hux_test', 'test_hook_single_invoke_return', ['bar']);
+    $this->assertEquals([
+      [
+        'Drupal\hux_replacement_test\HuxReplacementTestHooks',
+        'myReplacementWithOriginalMultipleImplementations',
+        'bar',
+      ],
+      'hux_test_test_hook_single_invoke_return',
+      [
+        'Drupal\hux_test\HuxTestHooks',
+        'testHookSingleReturn1',
+      ],
+      [
+        'Drupal\hux_test\HuxTestHooks',
+        'testHookSingleReturn2',
+      ],
+    ], HuxTestCallTracker::$calls);
+    $this->assertEquals('myReplacementWithOriginalMultipleImplementations passed down testHookSingleReturn2 return', $result);
+  }
+
+  /**
    * Tests with the replacement.
    *
    * @covers ::invokeAllWith
