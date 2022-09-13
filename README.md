@@ -30,27 +30,21 @@ Other features
 
 # Usage
 
-Add an entry to your modules' services.yml file. The entry simply needs to be a
-public service, with a class and the 'hooks' tag.
+Create a class in the directory/namespace:
 
-Once a hook class has been added as a service, just clear the site cache.
+ - File: `src/Hooks/MyModuleHooks.php`
+ - Namespace: `Drupal\Hooks\MyModuleHooks`
+
+Once at least one hook has been added to the class, just clear the site cache.
 
 Tip: You do not need to clear the site cache to add more hook implementations!
-
-```yaml
-services:
-  my_module.hooks:
-    class: Drupal\my_module\MyModuleHooks
-    tags:
-      - { name: hooks }
-```
 
 And in the class file:
 
 ```php
 declare(strict_types=1);
 
-namespace Drupal\my_module;
+namespace Drupal\my_module\Hooks;
 
 use Drupal\hux\Attribute\Alter;
 use Drupal\hux\Attribute\Hook;
@@ -120,6 +114,24 @@ at https://www.drupal.org/project/coder/issues/3250346 to appease code sniffer.
 Working examples of all Hux features can be found in included tests.
 
 # Optional configuration
+
+## Hooks classes outside of Hooks namespace/directory
+
+Hooks will be automatically discovered in the Hooks namespace, however you can
+register a class outside this directory by specifying a service.
+
+Add an entry to your modules' services.yml file. The entry simply needs to be a
+public service, with a class and the 'hooks' tag.
+
+```yaml
+services:
+  my_module.hooks:
+    class: Drupal\my_module\MyModuleHooks
+    tags:
+      - { name: hooks }
+```
+
+Then clear the site cache.
 
 ## Optimised mode
 
