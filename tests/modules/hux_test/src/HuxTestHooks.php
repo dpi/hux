@@ -33,6 +33,8 @@ final class HuxTestHooks {
   }
 
   /**
+   * Implements multiple hooks.
+   *
    * Implements test_hook_multi_listener().
    * Implements test_hook_multi_listener2().
    *

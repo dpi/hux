@@ -37,6 +37,8 @@ final class HuxReplacementTestHooks {
   }
 
   /**
+   * Replaces multiple hooks.
+   *
    * Replaces hook_original_invoker_attribute().
    */
   #[ReplaceOriginalHook('original_invoker_attribute_first', moduleName: 'hux_test')]
@@ -64,6 +66,8 @@ final class HuxReplacementTestHooks {
   }
 
   /**
+   * Replaces multiple hooks.
+   *
    * Replaces hux_test_foo3().
    * Replaces hux_test_foo4().
    *

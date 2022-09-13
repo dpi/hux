@@ -31,6 +31,8 @@ final class HuxAlterTestHooks {
   }
 
   /**
+   * Implements multiple alters.
+   *
    * Implements test_hook_multi_listener_alter().
    * Implements test_hook_multi_listener2_alter().
    *
