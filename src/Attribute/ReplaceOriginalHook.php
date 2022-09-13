@@ -21,6 +21,9 @@ final class ReplaceOriginalHook {
   /**
    * Constructs a ReplaceOriginalHook.
    *
+   * When implementing this attribute, you must ensure named parameters are used
+   * with the third parameter and onwards, to avoid breakage.
+   *
    * @param string $hook
    *   The hook to implement.
    * @param string $moduleName
@@ -34,6 +37,13 @@ final class ReplaceOriginalHook {
     public string $moduleName,
     public bool $originalInvoker = FALSE,
   ) {
+    if ($originalInvoker) {
+      @trigger_error(sprintf(
+        "Requesting \$originalInvoker with %s is deprecated, and will be removed in Hux 2.0. Instead, tag the callable parameter to receive the original invoker with %s.",
+        ReplaceOriginalHook::class,
+        OriginalInvoker::class,
+      ), \E_USER_DEPRECATED);
+    }
   }
 
 }

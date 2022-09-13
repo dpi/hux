@@ -153,6 +153,53 @@ final class HuxReplacementTest extends KernelTestBase {
   }
 
   /**
+   * Tests original invoker with various positions.
+   *
+   * Ensures original invoker is inserted around any original arguments.
+   *
+   * @covers \Drupal\hux\HuxDiscovery::discovery
+   * @covers \Drupal\hux\HuxReplacementHook::getCallable
+   */
+  public function testOriginalInvokerPositions(): void {
+    $this->moduleInstaller()->install(['hux_replacement_test'], TRUE);
+
+    $this->moduleHandler()->invokeAll('original_invoker_attribute_first', ['bar1', 'bar2']);
+    $this->assertEquals([
+      [
+        'Drupal\hux_replacement_test\HuxReplacementTestHooks',
+        'originalInvokerAttributeFirst',
+        'bar1',
+        'bar2',
+      ],
+      'hux_test_original_invoker_attribute_first',
+    ], HuxTestCallTracker::$calls);
+
+    HuxTestCallTracker::$calls = [];
+    $this->moduleHandler()->invokeAll('original_invoker_attribute_middle', ['bar1', 'bar2']);
+    $this->assertEquals([
+      [
+        'Drupal\hux_replacement_test\HuxReplacementTestHooks',
+        'originalInvokerAttributeMiddle',
+        'bar1',
+        'bar2',
+      ],
+      'hux_test_original_invoker_attribute_middle',
+    ], HuxTestCallTracker::$calls);
+
+    HuxTestCallTracker::$calls = [];
+    $this->moduleHandler()->invokeAll('original_invoker_attribute_last', ['bar1', 'bar2']);
+    $this->assertEquals([
+      [
+        'Drupal\hux_replacement_test\HuxReplacementTestHooks',
+        'originalInvokerAttributeLast',
+        'bar1',
+        'bar2',
+      ],
+      'hux_test_original_invoker_attribute_last',
+    ], HuxTestCallTracker::$calls);
+  }
+
+  /**
    * Tests without the replacement.
    *
    * @covers ::invokeAll

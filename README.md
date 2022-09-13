@@ -54,6 +54,7 @@ namespace Drupal\my_module;
 
 use Drupal\hux\Attribute\Alter;
 use Drupal\hux\Attribute\Hook;
+use Drupal\hux\Attribute\OriginalInvoker;
 use Drupal\hux\Attribute\ReplaceOriginalHook;
 
 /**
@@ -85,8 +86,8 @@ final class MyModuleHooks {
     return AccessResult::neutral();
   }
 
-  #[ReplaceOriginalHook(hook: 'entity_access', moduleName: 'media', originalInvoker: TRUE)]
-  public function myEntityAccess5(callable $originalInvoker, EntityInterface $entity, string $operation, AccountInterface $account): AccessResultInterface {
+  #[ReplaceOriginalHook(hook: 'entity_access', moduleName: 'media')]
+  public function myEntityAccess5(EntityInterface $entity, string $operation, AccountInterface $account, #[OriginalInvoker] callable $originalInvoker): AccessResultInterface {
     // If you override a hook for another module, you can have the original
     // implementation passed to you as a callable!
     $originalResult = $originalInvoker($entity, $operation, $account);

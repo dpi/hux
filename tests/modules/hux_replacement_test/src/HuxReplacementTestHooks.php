@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\hux_replacement_test;
 
+use Drupal\hux\Attribute\OriginalInvoker;
 use Drupal\hux\Attribute\ReplaceOriginalHook;
 use Drupal\hux_test\HuxTestCallTracker;
 
@@ -33,6 +34,33 @@ final class HuxReplacementTestHooks {
     HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $something]);
     $originalInvoker($something);
     return __FUNCTION__ . ' return';
+  }
+
+  /**
+   * Replaces hook_original_invoker_attribute().
+   */
+  #[ReplaceOriginalHook('original_invoker_attribute_first', moduleName: 'hux_test')]
+  public function originalInvokerAttributeFirst(#[OriginalInvoker] callable $originalInvoker, string $something1, string $something2): void {
+    HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $something1, $something2]);
+    $originalInvoker($something1, $something2);
+  }
+
+  /**
+   * Replaces hook_original_invoker_attribute().
+   */
+  #[ReplaceOriginalHook('original_invoker_attribute_middle', moduleName: 'hux_test')]
+  public function originalInvokerAttributeMiddle(string $something1, #[OriginalInvoker] callable $originalInvoker, string $something2): void {
+    HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $something1, $something2]);
+    $originalInvoker($something1, $something2);
+  }
+
+  /**
+   * Replaces hook_original_invoker_attribute().
+   */
+  #[ReplaceOriginalHook('original_invoker_attribute_last', moduleName: 'hux_test')]
+  public function originalInvokerAttributeLast(string $something1, string $something2, #[OriginalInvoker] callable $originalInvoker): void {
+    HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $something1, $something2]);
+    $originalInvoker($something1, $something2);
   }
 
   /**

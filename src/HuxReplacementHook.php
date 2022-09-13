@@ -8,6 +8,10 @@ namespace Drupal\hux;
  * Replacement hook.
  *
  * @property callable $replacement
+ *
+ * @internal
+ *   For internal use only, behavior and serialized data structure may change at
+ *   any time.
  */
 final class HuxReplacementHook {
 
@@ -16,13 +20,13 @@ final class HuxReplacementHook {
    *
    * @param callable $replacement
    *   The replacement callable.
-   * @param bool $needsOriginal
-   *   Whether the replacement callable needs the original invoker.
+   * @param int[] $originalInvokerPositions
+   *   Argument positions of original invokers.
    */
   // @codingStandardsIgnoreLine
   public function __construct(
     public $replacement,
-    public bool $needsOriginal,
+    public array $originalInvokerPositions,
   ) {
   }
 
@@ -37,12 +41,15 @@ final class HuxReplacementHook {
    *   a callable to the original hook implementation before the argument list.
    */
   public function getCallable(callable $original): callable {
-    if (!$this->needsOriginal) {
+    if (count($this->originalInvokerPositions) === 0) {
       return $this->replacement;
     }
 
     return function (...$args) use ($original) {
-      return ($this->replacement)($original, ...$args);
+      foreach ($this->originalInvokerPositions as $position) {
+        array_splice($args, $position, 0, $original);
+      }
+      return ($this->replacement)(...$args);
     };
   }
 

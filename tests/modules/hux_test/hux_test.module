@@ -38,3 +38,27 @@ function hux_test_foo4(): string {
   HuxTestCallTracker::record(__FUNCTION__);
   return __FUNCTION__ . ' return';
 }
+
+/**
+ * Implements hook_original_invoker_attribute_first().
+ */
+function hux_test_original_invoker_attribute_first(): string {
+  HuxTestCallTracker::record(__FUNCTION__);
+  return __FUNCTION__ . ' return';
+}
+
+/**
+ * Implements original_invoker_attribute_middle().
+ */
+function hux_test_original_invoker_attribute_middle(): string {
+  HuxTestCallTracker::record(__FUNCTION__);
+  return __FUNCTION__ . ' return';
+}
+
+/**
+ * Implements original_invoker_attribute_last().
+ */
+function hux_test_original_invoker_attribute_last(): string {
+  HuxTestCallTracker::record(__FUNCTION__);
+  return __FUNCTION__ . ' return';
+}

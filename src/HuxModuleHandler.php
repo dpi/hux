@@ -235,13 +235,13 @@ final class HuxModuleHandler implements ModuleHandlerInterface {
       $serviceId,
       $moduleName,
       $methodName,
-      $originalInvoker,
+      $originalInvokerPositions,
     ]) {
       $service = $this->container->get($serviceId);
       $hookInvoker = \Closure::fromCallable([$service, $methodName]);
       $this->hookReplacements[$hook][$moduleName] = new HuxReplacementHook(
         $hookInvoker,
-        $originalInvoker,
+        $originalInvokerPositions,
       );
     }
 

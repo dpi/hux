@@ -6,6 +6,7 @@ namespace Drupal\hux;
 
 use Drupal\hux\Attribute\Alter;
 use Drupal\hux\Attribute\Hook;
+use Drupal\hux\Attribute\OriginalInvoker;
 use Drupal\hux\Attribute\ReplaceOriginalHook;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -80,11 +81,30 @@ final class HuxDiscovery {
         foreach ($attributesHookReplacements as $attribute) {
           $instance = $attribute->newInstance();
           assert($instance instanceof ReplaceOriginalHook);
+
+          // Original invoker positions.
+          /** @var int[] $originalInvokerPositions */
+          $originalInvokerPositions = [];
+
+          // Support legacy attribute parameter.
+          if ($instance->originalInvoker === TRUE) {
+            // Legacy behavior added original invoker to first parameter.
+            $originalInvokerPositions[] = 0;
+          }
+
+          $parameters = $reflectionMethod->getParameters();
+          foreach ($parameters as $parameter) {
+            $attributes = $parameter->getAttributes(OriginalInvoker::class);
+            if (count($attributes) > 0) {
+              $originalInvokerPositions[] = $parameter->getPosition();
+            }
+          }
+
           $this->discovery[ReplaceOriginalHook::class][$instance->hook][] = [
             $serviceId,
             $instance->moduleName,
             $methodName,
-            $instance->originalInvoker,
+            $originalInvokerPositions,
           ];
         }
 
@@ -121,7 +141,7 @@ final class HuxDiscovery {
    * @param string $hook
    *   A hook.
    *
-   * @return \Generator<array{string, string, string, bool}>
+   * @return \Generator<array{string, string, string, int[]}>
    *   A generator yielding an array of service ID, module name, method name,
    *   and flag for whether the original implementation should be passed as a
    *   callable as first parameter.
