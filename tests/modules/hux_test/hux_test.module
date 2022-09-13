@@ -22,3 +22,19 @@ function hux_test_foo2(): string {
   HuxTestCallTracker::record(__FUNCTION__);
   return __FUNCTION__ . ' return';
 }
+
+/**
+ * Implements hook_foo3().
+ */
+function hux_test_foo3(): string {
+  HuxTestCallTracker::record(__FUNCTION__);
+  return __FUNCTION__ . ' return';
+}
+
+/**
+ * Implements hook_foo4().
+ */
+function hux_test_foo4(): string {
+  HuxTestCallTracker::record(__FUNCTION__);
+  return __FUNCTION__ . ' return';
+}

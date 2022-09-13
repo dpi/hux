@@ -96,6 +96,38 @@ final class HuxAlterTest extends KernelTestBase {
   }
 
   /**
+   * @covers \Drupal\hux\HuxDiscovery::discovery
+   * @see \Drupal\hux_alter_test\HuxAlterTestHooks::testAlterMultiListener
+   */
+  public function testMultiListener(): void {
+    $data = __FUNCTION__;
+    // Treat as a counter.
+    $context1 = 0;
+    $context2 = 'context two';
+    $this->moduleHandler()->alter([
+      'multi_listener',
+      'multi_listener2',
+    ], $data, $context1, $context2);
+
+    $this->assertEquals([
+      [
+        'Drupal\hux_alter_test\HuxAlterTestHooks',
+        'testAlterMultiListener',
+        'testMultiListener',
+        1,
+        'context two',
+      ],
+      [
+        'Drupal\hux_alter_test\HuxAlterTestHooks',
+        'testAlterMultiListener',
+        'testMultiListener',
+        2,
+        'context two',
+      ],
+    ], HuxTestCallTracker::$calls);
+  }
+
+  /**
    * The module installer.
    */
   private function moduleInstaller(): ModuleInstallerInterface {

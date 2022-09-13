@@ -30,4 +30,19 @@ final class HuxAlterTestHooks {
     $data = __FUNCTION__ . ' hit';
   }
 
+  /**
+   * Implements test_hook_multi_listener_alter().
+   * Implements test_hook_multi_listener2_alter().
+   *
+   * Tests an alter listening for multiple hooks.
+   */
+  #[
+    Alter('multi_listener'),
+    Alter('multi_listener2'),
+  ]
+  public function testAlterMultiListener(&$data, &$context1, &$context2): void {
+    $context1++;
+    HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $data, $context1, $context2]);
+  }
+
 }

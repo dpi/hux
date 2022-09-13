@@ -62,6 +62,28 @@ final class HuxTest extends KernelTestBase {
   }
 
   /**
+   * @covers \Drupal\hux\HuxDiscovery::discovery
+   * @see \Drupal\hux_test\HuxTestHooks::testHookMultiListener
+   */
+  public function testMultiListener(): void {
+    $this->moduleHandler()->invokeAll('test_hook_multi_listener', ['bar1']);
+    $this->moduleHandler()->invokeAll('test_hook_multi_listener2', ['bar2']);
+    $this->assertEquals([
+      [
+        'Drupal\hux_test\HuxTestHooks',
+        'testHookMultiListener',
+        'bar1',
+      ],
+      [
+        'Drupal\hux_test\HuxTestHooks',
+        'testHookMultiListener',
+        'bar2',
+      ],
+    ], HuxTestCallTracker::$calls);
+    $this->moduleHandler()->invokeAll('test_hook', ['bar']);
+  }
+
+  /**
    * The module installer.
    */
   private function moduleInstaller(): ModuleInstallerInterface {

@@ -260,6 +260,29 @@ final class HuxReplacementTest extends KernelTestBase {
   }
 
   /**
+   * Tests a replacement of multiple hooks.
+   *
+   * @covers \Drupal\hux\HuxDiscovery::discovery
+   */
+  public function testMultiReplacement(): void {
+    $this->moduleInstaller()->install(['hux_replacement_test'], TRUE);
+    $this->moduleHandler()->invokeAll('foo3', ['bar1']);
+    $this->moduleHandler()->invokeAll('foo4', ['bar2']);
+    $this->assertEquals([
+      [
+        'Drupal\hux_replacement_test\HuxReplacementTestHooks',
+        'testHookMultiListener',
+        'bar1',
+      ],
+      [
+        'Drupal\hux_replacement_test\HuxReplacementTestHooks',
+        'testHookMultiListener',
+        'bar2',
+      ],
+    ], HuxTestCallTracker::$calls);
+  }
+
+  /**
    * The module installer.
    */
   private function moduleInstaller(): ModuleInstallerInterface {

@@ -32,4 +32,18 @@ final class HuxTestHooks {
     return __FUNCTION__ . ' return';
   }
 
+  /**
+   * Implements test_hook_multi_listener().
+   * Implements test_hook_multi_listener2().
+   *
+   * Tests a hook listening for multiple hooks.
+   */
+  #[
+    Hook('test_hook_multi_listener'),
+    Hook('test_hook_multi_listener2'),
+  ]
+  public function testHookMultiListener(string $something): void {
+    HuxTestCallTracker::record([__CLASS__, __FUNCTION__, $something]);
+  }
+
 }

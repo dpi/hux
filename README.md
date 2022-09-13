@@ -6,11 +6,11 @@ Hux is a project specifically designed for developers, allowing hook
 implementations without needing to define a .module file or any kind of proxy
 class/service features.
 
-There are a [few][project-hook_event_dispatcher] [projects][project-hooks] 
+There are a [few][project-hook_event_dispatcher] [projects][project-hooks]
 [out][project-entity_events] there that try to introduce an event subscriber
-driven way of working. 
+driven way of working.
 Hux is an in between solution, allowing the full benefits of dependency
-injection and class driven logic without going fully in with events. 
+injection and class driven logic without going fully in with events.
 Methods can have the same signature as original hook implementations.
 Discovery is automatic, only requiring a hook class to be registered as a
 tagged Drupal service and initial cache clear.
@@ -33,7 +33,7 @@ Other features
 Add an entry to your modules' services.yml file. The entry simply needs to be a
 public service, with a class and the 'hooks' tag.
 
-Once a hook class has been added as a service, just clear the site cache. 
+Once a hook class has been added as a service, just clear the site cache.
 
 Tip: You do not need to clear the site cache to add more hook implementations!
 
@@ -57,36 +57,36 @@ use Drupal\hux\Attribute\Hook;
 use Drupal\hux\Attribute\ReplaceOriginalHook;
 
 /**
- * Examples of 'entity_access' hooks and 'user_format_name' alter.
+ * Usage examples.
  */
 final class MyModuleHooks {
 
   #[Hook('entity_access')]
-  public function myEntityAccess(EntityInterface $entity, string $operation, AccountInterface $account): AccessResult {
+  public function myEntityAccess(EntityInterface $entity, string $operation, AccountInterface $account): AccessResultInterface {
     // A barebones implementation.
     return AccessResult::neutral();
   }
 
   #[Hook('entity_access', priority: 100)]
-  public function myEntityAccess2(EntityInterface $entity, string $operation, AccountInterface $account): AccessResult {
+  public function myEntityAccess2(EntityInterface $entity, string $operation, AccountInterface $account): AccessResultInterface {
     // You can set priority if you have multiple of the same hook!
     return AccessResult::neutral();
   }
 
   #[Hook('entity_access', moduleName: 'a_different_module', priority: 200)]
-  public function myEntityAccess3(EntityInterface $entity, string $operation, AccountInterface $account): AccessResult {
+  public function myEntityAccess3(EntityInterface $entity, string $operation, AccountInterface $account): AccessResultInterface {
     // You can masquerade as a different module!
     return AccessResult::neutral();
   }
 
   #[ReplaceOriginalHook(hook: 'entity_access', moduleName: 'media')]
-  public function myEntityAccess4(EntityInterface $entity, string $operation, AccountInterface $account): AccessResult {
+  public function myEntityAccess4(EntityInterface $entity, string $operation, AccountInterface $account): AccessResultInterface {
     // You can override hooks for other modules! E.g \media_entity_access()
     return AccessResult::neutral();
   }
 
   #[ReplaceOriginalHook(hook: 'entity_access', moduleName: 'media', originalInvoker: TRUE)]
-  public function myEntityAccess5(callable $originalInvoker, EntityInterface $entity, string $operation, AccountInterface $account): AccessResult {
+  public function myEntityAccess5(callable $originalInvoker, EntityInterface $entity, string $operation, AccountInterface $account): AccessResultInterface {
     // If you override a hook for another module, you can have the original
     // implementation passed to you as a callable!
     $originalResult = $originalInvoker($entity, $operation, $account);
@@ -96,7 +96,17 @@ final class MyModuleHooks {
 
   #[Alter('user_format_name')]
   public function myCustomAlter(string &$name, AccountInterface $account): void {
-    $name .= ' altered!'; 
+    $name .= ' altered!';
+  }
+
+  #[
+    Hook('entity_insert'),
+    Hook('entity_delete'),
+  ]
+  public function myEntityAccess(EntityInterface $entity): void {
+    // Associate with multiple!
+    // Also works with Alters and Replacements.
+    return AccessResult::neutral();
   }
 
 }
@@ -112,7 +122,7 @@ Working examples of all Hux features can be found in included tests.
 
 ## Optimised mode
 
-Hux' [optimized mode][optimized-mode] provides an option geared towards being 
+Hux' [optimized mode][optimized-mode] provides an option geared towards being
 developer friendly or optimized for production use. By default this mode is off,
 but it should be turned on in production for small gains in performance.
 

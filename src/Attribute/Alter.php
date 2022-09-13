@@ -7,7 +7,7 @@ namespace Drupal\hux\Attribute;
 /**
  * An alter.
  */
-#[\Attribute(\Attribute::TARGET_METHOD)]
+#[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 // @codingStandardsIgnoreLine
 class Alter {
 
